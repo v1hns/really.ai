@@ -1,0 +1,29 @@
+"""
+Configuration — loaded from environment variables / .env file
+"""
+from pydantic_settings import BaseSettings
+
+
+class Settings(BaseSettings):
+    # WhatsApp Cloud API
+    WHATSAPP_PHONE_NUMBER_ID: str
+    WHATSAPP_ACCESS_TOKEN: str
+    WHATSAPP_VERIFY_TOKEN: str  # arbitrary secret you choose for webhook verification
+
+    # Anthropic
+    ANTHROPIC_API_KEY: str
+
+    # App
+    DATABASE_URL: str = "sqlite:///./really.db"
+    DEBUG: bool = False
+    BOT_NAME: str = "Really"
+    BOT_PHONE_DISPLAY: str = "Really AI"
+
+    # Matching
+    MATCH_SCORE_THRESHOLD: float = 0.6  # minimum score to trigger an introduction
+    MAX_MATCHES_PER_USER: int = 5
+
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+
+
+settings = Settings()
