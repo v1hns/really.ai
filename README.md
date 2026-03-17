@@ -1,14 +1,32 @@
 # really.ai — WhatsApp Real Estate Superconnecter
 
-An AI-powered WhatsApp bot that connects buyers, sellers, renters, landlords, agents, and investors — like Boardy, but for real estate.
+**really.ai is an AI-powered real estate matchmaker that runs on WhatsApp and phone calls.** Message or call the number, tell it what you need, and it connects you with the right person — buyer meets seller, renter meets landlord, investor meets agent — automatically.
 
-## How it works
+## TL;DR — how it runs
 
-1. User messages your WhatsApp Business number
-2. Bot presents a role selector (buyer / seller / renter / landlord / agent / investor)
-3. Claude conducts a natural intake conversation, building their profile
-4. Once the profile is complete, the matching engine finds compatible users
-5. Bot sends warm AI-written introductions to both parties
+```
+User texts/calls → Claude asks intake questions → profile stored in DB
+→ matching engine scores compatibility → both parties get an intro (WhatsApp + call)
+```
+
+1. **User contacts Really** — via WhatsApp message, voice note, or phone call
+2. **Claude runs intake** — asks role (buyer / seller / renter / landlord / agent / investor), location, budget, property type, timeline
+3. **Profile is built** — Claude extracts structured data from natural conversation and saves it
+4. **Matching fires** — scored against all other active users (location 40%, budget 35%, property type 25%)
+5. **Intro sent** — both parties get an AI-written WhatsApp message; if Twilio is configured, Really calls them too
+
+**To demo it locally (no WhatsApp needed):**
+```bash
+python demo.py          # single-user chat
+python demo.py --match  # two-persona demo — watch a buyer + seller get matched live
+```
+
+**To run the full server:**
+```bash
+cp .env.example .env    # fill in API keys
+uvicorn main:app --reload --port 8000
+ngrok http 8000         # expose for webhooks
+```
 
 ## Stack
 
