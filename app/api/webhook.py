@@ -39,6 +39,21 @@ async def receive_webhook(request: Request):
         phone = event["from"]
         text = event["text"]
         button_id = event.get("button_id")
+        media_id = event.get("media_id")
+
+        # Transcribe voice messages before processing
+        if event["type"] == "audio" and media_id:
+            try:
+                from app.services.voice import transcribe_whatsapp_audio
+                text = await transcribe_whatsapp_audio(media_id)
+                log.info(f"Transcribed voice from {phone}: {text!r}")
+            except Exception as e:
+                log.error(f"Transcription failed for {phone}: {e}")
+                await handle_message(
+                    phone,
+                    "Sorry, I couldn't understand that voice message. Could you type it out?",
+                )
+                continue
 
         # Check if this is a new user (no history)
         from app.db.engine import engine

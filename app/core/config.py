@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     # Anthropic
     ANTHROPIC_API_KEY: str
 
+    # OpenAI (Whisper transcription + TTS voice replies)
+    OPENAI_API_KEY: str = ""
+    VOICE_REPLIES: bool = False   # set True to reply with audio notes instead of text
+
     # App
     DATABASE_URL: str = "sqlite:///./really.db"
     DEBUG: bool = False

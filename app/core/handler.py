@@ -162,8 +162,16 @@ async def handle_message(phone: str, text: str, button_id: str | None = None):
             _apply_profile_update(user, profile_update, session)
             session.refresh(user)
 
-        # Send reply
-        await whatsapp.send_message(phone, reply)
+        # Send reply — voice note if VOICE_REPLIES is enabled
+        if settings.VOICE_REPLIES and settings.OPENAI_API_KEY:
+            try:
+                from app.services.voice import send_voice_reply
+                await send_voice_reply(phone, reply)
+            except Exception as e:
+                log.warning(f"TTS failed, falling back to text: {e}")
+                await whatsapp.send_message(phone, reply)
+        else:
+            await whatsapp.send_message(phone, reply)
 
         # Attempt matching when profile becomes active
         if user.state == ConversationState.ACTIVE:

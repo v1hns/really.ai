@@ -88,11 +88,36 @@ async def send_list(to: str, header: str, body: str, button_label: str, sections
         return r.json()
 
 
+async def send_audio(to: str, media_id: str) -> dict:
+    """Send a pre-uploaded audio file as a WhatsApp voice note."""
+    url = f"{GRAPH_API_BASE}/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
+    headers = {
+        "Authorization": f"Bearer {settings.WHATSAPP_ACCESS_TOKEN}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": to,
+        "type": "audio",
+        "audio": {"id": media_id},
+    }
+    async with httpx.AsyncClient(timeout=10) as client:
+        r = await client.post(url, headers=headers, json=payload)
+        r.raise_for_status()
+        return r.json()
+
+
 def parse_incoming(payload: dict) -> list[dict]:
     """Extract message events from a WhatsApp webhook payload.
 
     Returns list of dicts:
-      {"from": phone, "type": "text"|"interactive", "text": str, "button_id": str|None}
+      {
+        "from": phone,
+        "type": "text" | "interactive" | "audio",
+        "text": str,
+        "button_id": str | None,
+        "media_id": str | None,   # set for audio messages
+      }
     """
     events = []
     for entry in payload.get("entry", []):
@@ -108,6 +133,16 @@ def parse_incoming(payload: dict) -> list[dict]:
                         "type": "text",
                         "text": msg["text"]["body"],
                         "button_id": None,
+                        "media_id": None,
+                    })
+                elif msg_type in ("audio", "voice"):
+                    audio = msg.get("audio") or msg.get("voice") or {}
+                    events.append({
+                        "from": phone,
+                        "type": "audio",
+                        "text": "",          # filled in after transcription
+                        "button_id": None,
+                        "media_id": audio.get("id"),
                     })
                 elif msg_type == "interactive":
                     interactive = msg.get("interactive", {})
@@ -118,6 +153,7 @@ def parse_incoming(payload: dict) -> list[dict]:
                             "type": "interactive",
                             "text": reply["title"],
                             "button_id": reply["id"],
+                            "media_id": None,
                         })
                     elif interactive.get("type") == "list_reply":
                         reply = interactive["list_reply"]
@@ -126,5 +162,6 @@ def parse_incoming(payload: dict) -> list[dict]:
                             "type": "interactive",
                             "text": reply["title"],
                             "button_id": reply["id"],
+                            "media_id": None,
                         })
     return events
