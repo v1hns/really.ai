@@ -17,6 +17,12 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     VOICE_REPLIES: bool = False   # set True to reply with audio notes instead of text
 
+    # Twilio (phone calls)
+    TWILIO_ACCOUNT_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_PHONE_NUMBER: str = ""  # e.g. +14155551234
+    PUBLIC_BASE_URL: str = ""      # e.g. https://abc123.ngrok.io — used to build TwiML callback URLs
+
     # App
     DATABASE_URL: str = "sqlite:///./really.db"
     DEBUG: bool = False

@@ -70,14 +70,14 @@ def _apply_profile_update(user: User, update: dict, session: Session):
 
 
 async def _run_matching(user: User, session: Session):
-    """Attempt matching and send introduction messages if matches found."""
+    """Attempt matching and send introduction messages (+ optional call) if matches found."""
     matches = matching.find_matches(user, session)
     for matched_user, score, reason in matches:
         # Record match
         m = Match(initiator_id=user.id, target_id=matched_user.id, score=score, reason=reason)
         session.add(m)
 
-        # Send intro to user
+        # Send intro to user via WhatsApp
         intro_to_user = ai.build_intro_message(user, matched_user)
         await whatsapp.send_message(
             user.phone,
@@ -85,7 +85,7 @@ async def _run_matching(user: User, session: Session):
             f"They've been notified about you too. Reply here if you'd like me to share your contact with them.",
         )
 
-        # Send intro to matched_user
+        # Send intro to matched_user via WhatsApp
         intro_to_match = ai.build_intro_message(matched_user, user)
         await whatsapp.send_message(
             matched_user.phone,
@@ -102,7 +102,33 @@ async def _run_matching(user: User, session: Session):
         session.add(user)
         session.add(matched_user)
 
+        # Optionally call both parties if Twilio is configured
+        if settings.TWILIO_ACCOUNT_SID and settings.PUBLIC_BASE_URL:
+            _trigger_match_calls(user.phone, matched_user.phone)
+
     session.commit()
+
+
+def _trigger_match_calls(phone_a: str, phone_b: str):
+    """Fire outbound calls to both matched parties (non-blocking)."""
+    import asyncio
+    from app.services.twilio_client import make_call
+
+    def _call(phone: str):
+        try:
+            make_call(
+                to=phone,
+                webhook_base_url=settings.PUBLIC_BASE_URL,
+                context="match",
+            )
+            log.info(f"Outbound match call triggered to {phone}")
+        except Exception as e:
+            log.error(f"Outbound call failed to {phone}: {e}")
+
+    # Run in a thread so we don't block the async handler
+    import threading
+    threading.Thread(target=_call, args=(phone_a,), daemon=True).start()
+    threading.Thread(target=_call, args=(phone_b,), daemon=True).start()
 
 
 # ─── main handler ────────────────────────────────────────────────────────────

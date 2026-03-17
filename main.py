@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from app.api.webhook import router as webhook_router
+from app.api.calls import router as calls_router
 from app.db.engine import create_db
 from app.core.config import settings
 
@@ -30,6 +31,7 @@ app = FastAPI(
 )
 
 app.include_router(webhook_router, prefix="/api")
+app.include_router(calls_router, prefix="/api")
 
 
 @app.get("/health")
