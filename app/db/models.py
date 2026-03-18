@@ -1,7 +1,7 @@
 """
 Database models for really.ai
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
 from sqlmodel import Field, SQLModel, Relationship
@@ -47,9 +47,9 @@ class User(SQLModel, table=True):
     listing_description: Optional[str] = None
 
     # Metadata
-    created_at: datetime = Field(default_factory=lambda: datetime.now(datetime.UTC))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(datetime.UTC))
-    last_active: datetime = Field(default_factory=lambda: datetime.now(datetime.UTC))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_active: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     opt_in: bool = True
 
     messages: list["Message"] = Relationship(back_populates="user")
@@ -68,7 +68,7 @@ class Message(SQLModel, table=True):
     user_id: int = Field(foreign_key="user.id")
     role: str  # "user" or "assistant"
     content: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(datetime.UTC))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     user: Optional[User] = Relationship(back_populates="messages")
 
@@ -80,7 +80,7 @@ class Match(SQLModel, table=True):
     score: float = 0.0
     reason: Optional[str] = None
     introduced: bool = False
-    created_at: datetime = Field(default_factory=lambda: datetime.now(datetime.UTC))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     initiator: Optional[User] = Relationship(
         back_populates="sent_matches",

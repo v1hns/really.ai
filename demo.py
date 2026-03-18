@@ -11,7 +11,7 @@ Uses the real AI and matching engine — just needs ANTHROPIC_API_KEY in .env
 import argparse
 import asyncio
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 # ── make sure we can import app modules ──────────────────────────────────────
@@ -58,7 +58,7 @@ def _get_or_create(phone: str) -> User:
     with Session(engine) as s:
         user = s.exec(select(User).where(User.phone == phone)).first()
         if not user:
-            user = User(phone=phone, last_active=datetime.now(datetime.UTC))
+            user = User(phone=phone, last_active=datetime.now(timezone.utc))
             s.add(user)
             s.commit()
             s.refresh(user)

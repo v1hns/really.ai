@@ -1,7 +1,7 @@
 """
 Core message handler — orchestrates the full conversation loop
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlmodel import Session, select
 
 from app.db.models import User, Message, Match, ConversationState, UserRole
@@ -56,7 +56,7 @@ def _apply_profile_update(user: User, update: dict, session: Session):
             changed = True
 
     if changed:
-        user.updated_at = datetime.now(datetime.UTC)
+        user.updated_at = datetime.now(timezone.utc)
         # Advance state if profile is building
         if user.state == ConversationState.GREETING:
             user.state = ConversationState.ROLE_SELECTION
@@ -137,7 +137,7 @@ async def handle_message(phone: str, text: str, button_id: str | None = None):
     """Process one incoming WhatsApp message and send a reply."""
     with Session(engine) as session:
         user = _get_or_create_user(phone, session)
-        user.last_active = datetime.now(datetime.UTC)
+        user.last_active = datetime.now(timezone.utc)
         session.add(user)
         session.commit()
         session.refresh(user)

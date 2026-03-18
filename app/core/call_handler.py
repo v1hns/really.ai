@@ -11,7 +11,7 @@ Architecture:
 State is persisted in the same User/Message DB as WhatsApp, keyed by
 phone number, so conversation history is shared across channels.
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlmodel import Session, select
 from twilio.twiml.voice_response import VoiceResponse, Gather
 
@@ -121,7 +121,7 @@ async def handle_call_turn(
 
     with Session(engine) as session:
         user = _get_or_create_user(phone, session)
-        user.last_active = datetime.now(datetime.UTC)
+        user.last_active = datetime.now(timezone.utc)
         session.add(session.merge(user))
         session.commit()
         session.refresh(user)
