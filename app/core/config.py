@@ -5,10 +5,9 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # WhatsApp Cloud API
-    WHATSAPP_PHONE_NUMBER_ID: str
-    WHATSAPP_ACCESS_TOKEN: str
-    WHATSAPP_VERIFY_TOKEN: str  # arbitrary secret you choose for webhook verification
+    # Telegram Bot API
+    TELEGRAM_BOT_TOKEN: str
+    TELEGRAM_WEBHOOK_SECRET: str = ""  # optional secret for webhook verification
 
     # Anthropic (optional — no longer used for AI, kept for future use)
     ANTHROPIC_API_KEY: str = ""

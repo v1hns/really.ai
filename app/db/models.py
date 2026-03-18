@@ -27,7 +27,8 @@ class ConversationState(str, Enum):
 
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    phone: str = Field(unique=True, index=True)
+    chat_id: str = Field(unique=True, index=True)
+    phone: Optional[str] = Field(default=None, index=True)  # E.164 phone for Twilio calls
     email: Optional[str] = None
     name: Optional[str] = None
     role: UserRole = UserRole.UNKNOWN
