@@ -20,7 +20,6 @@ router = APIRouter(prefix="/intake", tags=["intake"])
 class IntakeSubmission(BaseModel):
     name: str
     phone: str
-    email: str
     role: str
 
 
@@ -35,7 +34,6 @@ async def submit_intake(body: IntakeSubmission):
         if not user:
             user = User(phone=phone)
         user.name = body.name.strip()
-        user.email = body.email.strip()
         try:
             user.role = UserRole(body.role)
         except ValueError:

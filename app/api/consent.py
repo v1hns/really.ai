@@ -14,7 +14,6 @@ from sqlmodel import Session, select
 
 from app.db.engine import engine
 from app.db.models import ConsentRequest, Match, User
-from app.services.email import send_introduction
 from app.services.twilio_client import send_sms
 from app.core.config import settings
 
@@ -110,18 +109,17 @@ async def sms_consent(
         initiator = s.get(User, match.initiator_id)
         target = s.get(User, match.target_id)
 
-        try:
-            email_id = await send_introduction(initiator, target)
-            match.introduced = True
-            s.add(match)
-            s.commit()
-            log.info(f"Email intro sent: {email_id} — {initiator.phone} ↔ {target.phone}")
+        match.introduced = True
+        s.add(match)
+        s.commit()
+        log.info(f"Intro sent: {initiator.phone} ↔ {target.phone}")
 
-            send_sms(this_user.phone, "Both parties are in! Check your email — we just sent a formal introduction. 🏡")
-            send_sms(other_user.phone, "Both parties are in! Check your email — we just sent a formal introduction. 🏡")
-
-        except Exception as e:
-            log.error(f"Email intro failed: {e}")
-            send_sms(phone, "You both said yes! We'll send the intro email shortly.")
-
+        send_sms(
+            this_user.phone,
+            f"You're connected! 🏡 {other_user.name or 'Your match'}'s number is {other_user.phone}. Good luck!",
+        )
+        send_sms(
+            other_user.phone,
+            f"You're connected! 🏡 {this_user.name or 'Your match'}'s number is {this_user.phone}. Good luck!",
+        )
         return {"status": "introduced"}
