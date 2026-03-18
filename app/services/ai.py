@@ -1,13 +1,16 @@
 """
-Claude-powered conversation manager for really.ai
+OpenAI-powered conversation manager for really.ai
 """
 import json
+import re
 from typing import Optional
-import anthropic
+from openai import AsyncOpenAI
 from app.core.config import settings
-from app.db.models import User, Message, UserRole, ConversationState
+from app.db.models import User, Message
 
-client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+
+MODEL = "gpt-4o-mini"
 
 SYSTEM_PROMPT = """You are Really, an AI real estate superconnecter on WhatsApp. Your job is to \
 understand what someone needs in real estate, build their profile through natural conversation, \
@@ -77,18 +80,19 @@ explaining why these two people should connect and share their first names + wha
 """
 
 
-def _build_messages(history: list[Message], new_message: str) -> list[dict]:
-    """Build the messages array for the Claude API call."""
-    msgs = []
-    for m in history[-20:]:  # last 20 messages for context window efficiency
+def _build_messages(history: list[Message], new_message: str, system_extra: str = "") -> list[dict]:
+    system = SYSTEM_PROMPT
+    if system_extra:
+        system += f"\n\n## Additional context\n{system_extra}"
+
+    msgs = [{"role": "system", "content": system}]
+    for m in history[-20:]:
         msgs.append({"role": m.role, "content": m.content})
     msgs.append({"role": "user", "content": new_message})
     return msgs
 
 
 def _extract_profile_update(text: str) -> tuple[str, Optional[dict]]:
-    """Strip <profile_update> JSON block from response and return (clean_text, update_dict)."""
-    import re
     pattern = r"<profile_update>(.*?)</profile_update>"
     match = re.search(pattern, text, re.DOTALL)
     if not match:
@@ -107,35 +111,27 @@ async def get_reply(
     incoming_text: str,
     system_extra: str = "",
 ) -> tuple[str, Optional[dict]]:
-    """
-    Generate a reply from Claude.
-    Returns (reply_text, profile_update_dict | None)
-    """
-    system = SYSTEM_PROMPT
-    if system_extra:
-        system += f"\n\n## Additional context\n{system_extra}"
+    """Generate a reply. Returns (reply_text, profile_update_dict | None)."""
+    messages = _build_messages(history, incoming_text, system_extra)
 
-    messages = _build_messages(history, incoming_text)
-
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
+    response = await client.chat.completions.create(
+        model=MODEL,
         max_tokens=1024,
-        system=system,
         messages=messages,
     )
 
-    raw = response.content[0].text
+    raw = response.choices[0].message.content or ""
     clean, profile_update = _extract_profile_update(raw)
     return clean, profile_update
 
 
-def build_intro_message(user_a: User, user_b: User) -> str:
+async def build_intro_message(user_a: User, user_b: User) -> str:
     """Generate an introduction message to send to both parties."""
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
+    response = await client.chat.completions.create(
+        model=MODEL,
         max_tokens=256,
-        system=SYSTEM_PROMPT,
         messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
             {
                 "role": "user",
                 "content": (
@@ -148,7 +144,7 @@ def build_intro_message(user_a: User, user_b: User) -> str:
                     f"listing={user_b.listing_description}. "
                     f"Address it to Person A and mention Person B by first name only."
                 ),
-            }
+            },
         ],
     )
-    return response.content[0].text.strip()
+    return (response.choices[0].message.content or "").strip()

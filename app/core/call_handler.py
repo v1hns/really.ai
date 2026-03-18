@@ -162,7 +162,7 @@ async def handle_call_turn(
                 matches = matching.find_matches(user, session)
                 if matches:
                     matched_user, score, reason = matches[0]
-                    match_blurb = ai.build_intro_message(user, matched_user)
+                    match_blurb = await ai.build_intro_message(user, matched_user)
                     match_blurb_clean = match_blurb.replace("*", "").replace("_", "")
 
                     # Record match
@@ -215,7 +215,7 @@ def _schedule_whatsapp_followups(user: User, matched_user: User, intro_text: str
                 f"🏡 *Your call with Really found a match!*\n\n{intro_text}\n\n"
                 "Reply YES to share your contact with them.",
             )
-            reverse = ai.build_intro_message(matched_user, user)
+            reverse = await ai.build_intro_message(matched_user, user)
             await whatsapp.send_message(
                 matched_user.phone,
                 f"🏡 *Really found a connection for you!*\n\n{reverse}\n\n"

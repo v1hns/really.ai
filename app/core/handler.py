@@ -78,7 +78,7 @@ async def _run_matching(user: User, session: Session):
         session.add(m)
 
         # Send intro to user via WhatsApp
-        intro_to_user = ai.build_intro_message(user, matched_user)
+        intro_to_user = await ai.build_intro_message(user, matched_user)
         await whatsapp.send_message(
             user.phone,
             f"🏡 *Great news — I found someone you should meet!*\n\n{intro_to_user}\n\n"
@@ -86,7 +86,7 @@ async def _run_matching(user: User, session: Session):
         )
 
         # Send intro to matched_user via WhatsApp
-        intro_to_match = ai.build_intro_message(matched_user, user)
+        intro_to_match = await ai.build_intro_message(matched_user, user)
         await whatsapp.send_message(
             matched_user.phone,
             f"🏡 *I found a great connection for you!*\n\n{intro_to_match}\n\n"

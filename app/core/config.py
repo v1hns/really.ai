@@ -10,11 +10,11 @@ class Settings(BaseSettings):
     WHATSAPP_ACCESS_TOKEN: str
     WHATSAPP_VERIFY_TOKEN: str  # arbitrary secret you choose for webhook verification
 
-    # Anthropic
-    ANTHROPIC_API_KEY: str
+    # Anthropic (optional — no longer used for AI, kept for future use)
+    ANTHROPIC_API_KEY: str = ""
 
-    # OpenAI (Whisper transcription + TTS voice replies)
-    OPENAI_API_KEY: str = ""
+    # OpenAI — AI conversations (GPT-4o-mini) + Whisper + TTS
+    OPENAI_API_KEY: str
     VOICE_REPLIES: bool = False   # set True to reply with audio notes instead of text
 
     # Twilio (phone calls)

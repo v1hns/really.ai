@@ -242,7 +242,7 @@ async def run_single():
         matches = _check_for_match(PHONE_A)
         for matched_user, score, reason in matches:
             _show_match_banner(matched_user, score, reason)
-            intro = ai.build_intro_message(_get_user(PHONE_A), matched_user)
+            intro = await ai.build_intro_message(_get_user(PHONE_A), matched_user)
             console.print(_bubble(
                 f"🏡 *Great news — I found someone you should meet!*\n\n{intro}\n\n"
                 "They've been notified about you. Should I share your contact with them?",
@@ -322,8 +322,8 @@ async def run_match_demo():
             _show_match_banner(matched_user, score, reason)
 
             alex = _get_user(PHONE_A)
-            intro_to_alex = ai.build_intro_message(alex, matched_user)
-            intro_to_jordan = ai.build_intro_message(matched_user, alex)
+            intro_to_alex = await ai.build_intro_message(alex, matched_user)
+            intro_to_jordan = await ai.build_intro_message(matched_user, alex)
 
             console.print(Rule("[cyan]Message sent to Alex[/]", style="cyan"))
             console.print(_bubble(
