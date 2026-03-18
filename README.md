@@ -36,7 +36,6 @@ pip install -r requirements.txt
 |---|---|---|---|
 | **Groq** | console.groq.com | AI brain (intake conversations) | Free |
 | **VAPI** | dashboard.vapi.ai | AI phone calls | Free trial |
-| **Twilio** | console.twilio.com | SMS consent messages | ~$0.01/SMS |
 | **WhatsApp Cloud API** | developers.facebook.com | WhatsApp channel (optional) | Free |
 | **OpenAI** | platform.openai.com | Voice notes via Whisper/TTS (optional) | Pay-as-you-go |
 
@@ -53,10 +52,6 @@ Open `.env` and fill in:
 GROQ_API_KEY=gsk_...               # from console.groq.com → API Keys
 VAPI_API_KEY=...                   # from dashboard.vapi.ai → API Keys
 VAPI_PHONE_NUMBER_ID=...           # from dashboard.vapi.ai → Phone Numbers → copy the ID
-TWILIO_ACCOUNT_SID=ACxxx           # from console.twilio.com → Account Info
-TWILIO_AUTH_TOKEN=...              # same page
-TWILIO_PHONE_NUMBER=+1415...       # a Twilio number you've purchased
-
 PUBLIC_BASE_URL=https://xxxx.ngrok.io   # your public URL (see step 5)
 
 # WhatsApp (optional)
@@ -88,15 +83,7 @@ ngrok http 8000
 
 Copy the `https://xxxx.ngrok.io` URL and set it as `PUBLIC_BASE_URL` in your `.env`, then restart the server.
 
-### 6. Configure Twilio inbound SMS
-
-For the YES/NO consent flow to work, point your Twilio number's inbound SMS webhook at:
-```
-https://your-url/api/consent/sms
-```
-In Twilio Console → Phone Numbers → your number → Messaging → Webhook URL.
-
-### 7. Test it
+### 6. Test it
 
 ```bash
 # Terminal demo — no keys needed except GROQ_API_KEY

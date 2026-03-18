@@ -102,33 +102,7 @@ async def _run_matching(user: User, session: Session):
         session.add(user)
         session.add(matched_user)
 
-        # Optionally call both parties if Twilio is configured
-        if settings.TWILIO_ACCOUNT_SID and settings.PUBLIC_BASE_URL:
-            _trigger_match_calls(user.phone, matched_user.phone)
-
     session.commit()
-
-
-def _trigger_match_calls(phone_a: str, phone_b: str):
-    """Fire outbound calls to both matched parties (non-blocking)."""
-    import asyncio
-    from app.services.twilio_client import make_call
-
-    def _call(phone: str):
-        try:
-            make_call(
-                to=phone,
-                webhook_base_url=settings.PUBLIC_BASE_URL,
-                context="match",
-            )
-            log.info(f"Outbound match call triggered to {phone}")
-        except Exception as e:
-            log.error(f"Outbound call failed to {phone}: {e}")
-
-    # Run in a thread so we don't block the async handler
-    import threading
-    threading.Thread(target=_call, args=(phone_a,), daemon=True).start()
-    threading.Thread(target=_call, args=(phone_b,), daemon=True).start()
 
 
 # ─── main handler ────────────────────────────────────────────────────────────
