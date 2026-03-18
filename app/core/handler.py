@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 
 from app.db.models import User, Message, Match, ConversationState, UserRole
 from app.db.engine import engine
-from app.services import whatsapp, ai, matching
+from app.services import telegram, ai, matching
 from app.core.config import settings
 
 import logging
@@ -15,10 +15,10 @@ log = logging.getLogger(__name__)
 
 # ─── helpers ────────────────────────────────────────────────────────────────
 
-def _get_or_create_user(phone: str, session: Session) -> User:
-    user = session.exec(select(User).where(User.phone == phone)).first()
+def _get_or_create_user(chat_id: str, session: Session) -> User:
+    user = session.exec(select(User).where(User.chat_id == chat_id)).first()
     if not user:
-        user = User(phone=phone)
+        user = User(chat_id=chat_id)
         session.add(user)
         session.commit()
         session.refresh(user)
@@ -70,25 +70,25 @@ def _apply_profile_update(user: User, update: dict, session: Session):
 
 
 async def _run_matching(user: User, session: Session):
-    """Attempt matching and send introduction messages (+ optional call) if matches found."""
+    """Attempt matching and send introduction messages if matches found."""
     matches = matching.find_matches(user, session)
     for matched_user, score, reason in matches:
         # Record match
         m = Match(initiator_id=user.id, target_id=matched_user.id, score=score, reason=reason)
         session.add(m)
 
-        # Send intro to user via WhatsApp
+        # Send intro to user via Telegram
         intro_to_user = await ai.build_intro_message(user, matched_user)
-        await whatsapp.send_message(
-            user.phone,
+        await telegram.send_message(
+            user.chat_id,
             f"🏡 *Great news — I found someone you should meet!*\n\n{intro_to_user}\n\n"
             f"They've been notified about you too. Reply here if you'd like me to share your contact with them.",
         )
 
-        # Send intro to matched_user via WhatsApp
+        # Send intro to matched_user via Telegram
         intro_to_match = await ai.build_intro_message(matched_user, user)
-        await whatsapp.send_message(
-            matched_user.phone,
+        await telegram.send_message(
+            matched_user.chat_id,
             f"🏡 *I found a great connection for you!*\n\n{intro_to_match}\n\n"
             f"Reply here if you'd like me to share your contact with them.",
         )
@@ -107,28 +107,28 @@ async def _run_matching(user: User, session: Session):
 
 # ─── main handler ────────────────────────────────────────────────────────────
 
-async def handle_message(phone: str, text: str, button_id: str | None = None):
-    """Process one incoming WhatsApp message and send a reply."""
+async def handle_message(chat_id: str, text: str, button_id: str | None = None):
+    """Process one incoming Telegram message and send a reply."""
     with Session(engine) as session:
-        user = _get_or_create_user(phone, session)
+        user = _get_or_create_user(chat_id, session)
         user.last_active = datetime.now(timezone.utc)
         session.add(user)
         session.commit()
         session.refresh(user)
 
         # Opt-out handling
-        if text.strip().upper() in {"STOP", "UNSUBSCRIBE", "OPTOUT", "OPT OUT", "QUIT"}:
+        if text.strip().upper() in {"STOP", "UNSUBSCRIBE", "OPTOUT", "OPT OUT", "QUIT", "/STOP"}:
             user.opt_in = False
             session.add(user)
             session.commit()
-            await whatsapp.send_message(
-                phone,
+            await telegram.send_message(
+                chat_id,
                 "You've been unsubscribed from Really. Reply START anytime to opt back in.",
             )
             return
 
         # Opt-back-in
-        if not user.opt_in and text.strip().upper() in {"START", "YES"}:
+        if not user.opt_in and text.strip().upper() in {"START", "YES", "/START"}:
             user.opt_in = True
             session.add(user)
             session.commit()
@@ -166,25 +166,25 @@ async def handle_message(phone: str, text: str, button_id: str | None = None):
         if settings.VOICE_REPLIES and settings.OPENAI_API_KEY:
             try:
                 from app.services.voice import send_voice_reply
-                await send_voice_reply(phone, reply)
+                await send_voice_reply(chat_id, reply)
             except Exception as e:
                 log.warning(f"TTS failed, falling back to text: {e}")
-                await whatsapp.send_message(phone, reply)
+                await telegram.send_message(chat_id, reply)
         else:
-            await whatsapp.send_message(phone, reply)
+            await telegram.send_message(chat_id, reply)
 
         # Attempt matching when profile becomes active
         if user.state == ConversationState.ACTIVE:
             try:
                 await _run_matching(user, session)
             except Exception as e:
-                log.error(f"Matching error for {phone}: {e}")
+                log.error(f"Matching error for {chat_id}: {e}")
 
 
-async def send_welcome(phone: str):
+async def send_welcome(chat_id: str):
     """Send initial greeting to a new user."""
-    await whatsapp.send_list(
-        to=phone,
+    await telegram.send_list(
+        chat_id=chat_id,
         header="👋 Welcome to Really",
         body="I'm Really — your AI real estate superconnecter. I'll match you with the right buyers, sellers, renters, landlords, agents, or investors in your market.\n\nWhat best describes you right now?",
         button_label="I'm looking to...",

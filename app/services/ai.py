@@ -12,7 +12,7 @@ client = AsyncGroq(api_key=settings.GROQ_API_KEY)
 
 MODEL = "llama-3.3-70b-versatile"
 
-SYSTEM_PROMPT = """You are Really, an AI real estate superconnecter on WhatsApp. Your job is to \
+SYSTEM_PROMPT = """You are Really, an AI real estate superconnecter on Telegram. Your job is to \
 understand what someone needs in real estate, build their profile through natural conversation, \
 and connect them with the right people.
 

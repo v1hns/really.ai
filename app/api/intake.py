@@ -30,7 +30,7 @@ async def submit_intake(body: IntakeSubmission):
     with Session(engine) as s:
         user = s.exec(select(User).where(User.phone == phone)).first()
         if not user:
-            user = User(phone=phone)
+            user = User(chat_id=f"phone_{phone}", phone=phone)
         user.state = ConversationState.PROFILE_BUILDING
         s.add(user)
         s.commit()
