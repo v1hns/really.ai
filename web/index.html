@@ -100,7 +100,7 @@
       </div>
 
       <form id="intakeForm" class="space-y-4">
-        <input type="tel" id="phoneInput" name="phone" placeholder="+1 415 555 0100"
+        <input type="tel" id="phoneInput" name="phone" placeholder="(415) 555-0100"
           class="w-full border-2 border-gray-200 rounded-xl px-5 py-4 text-base focus:border-brand transition-colors text-center tracking-wide"
           required autofocus />
         <button type="submit" id="submitBtn"
@@ -136,6 +136,23 @@
   </footer>
 
   <script>
+    // Phone auto-format
+    const phoneInput = document.getElementById('phoneInput');
+    phoneInput.addEventListener('input', (e) => {
+      let digits = e.target.value.replace(/\D/g, '');
+      if (digits.length === 11 && digits[0] === '1') digits = digits.slice(1);
+      digits = digits.slice(0, 10);
+      let formatted = '';
+      if (digits.length <= 3) {
+        formatted = digits.length ? `(${digits}` : '';
+      } else if (digits.length <= 6) {
+        formatted = `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+      } else {
+        formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+      }
+      e.target.value = formatted;
+    });
+
     document.getElementById('intakeForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -144,7 +161,7 @@
       btn.textContent = 'Calling...';
 
       const payload = {
-        phone: document.getElementById('phoneInput').value.trim(),
+        phone: '+1' + document.getElementById('phoneInput').value.replace(/\D/g, ''),
       };
 
       try {

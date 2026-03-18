@@ -22,9 +22,10 @@ class IntakeSubmission(BaseModel):
 
 @router.post("/submit")
 async def submit_intake(body: IntakeSubmission):
-    phone = body.phone.strip()
-    if not phone.startswith("+"):
-        phone = "+" + phone.lstrip("0")
+    digits = ''.join(c for c in body.phone if c.isdigit())
+    if len(digits) == 11 and digits[0] == '1':
+        digits = digits[1:]
+    phone = f"+1{digits}"
 
     with Session(engine) as s:
         user = s.exec(select(User).where(User.phone == phone)).first()

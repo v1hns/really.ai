@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     MATCH_SCORE_THRESHOLD: float = 0.6  # minimum score to trigger an introduction
     MAX_MATCHES_PER_USER: int = 5
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
 
 settings = Settings()

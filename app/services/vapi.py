@@ -155,6 +155,9 @@ async def _make_call(payload: dict) -> str:
             },
             json=payload,
         )
+        if not r.is_success:
+            import logging
+            logging.getLogger(__name__).error(f"VAPI error {r.status_code}: {r.text}")
         r.raise_for_status()
         return r.json().get("id", "")
 
