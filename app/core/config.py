@@ -13,8 +13,11 @@ class Settings(BaseSettings):
     # Anthropic (optional — no longer used for AI, kept for future use)
     ANTHROPIC_API_KEY: str = ""
 
-    # OpenAI — AI conversations (GPT-4o-mini) + Whisper + TTS
-    OPENAI_API_KEY: str
+    # OpenAI — Whisper transcription + TTS voice replies (optional)
+    OPENAI_API_KEY: str = ""
+
+    # Groq — AI conversations (free tier, llama-3.3-70b)
+    GROQ_API_KEY: str
     VOICE_REPLIES: bool = False   # set True to reply with audio notes instead of text
 
     # Twilio (phone calls)

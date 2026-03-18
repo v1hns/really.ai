@@ -1,16 +1,16 @@
 """
-OpenAI-powered conversation manager for really.ai
+Groq-powered conversation manager for really.ai (llama-3.3-70b, free tier)
 """
 import json
 import re
 from typing import Optional
-from openai import AsyncOpenAI
+from groq import AsyncGroq
 from app.core.config import settings
 from app.db.models import User, Message
 
-client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+client = AsyncGroq(api_key=settings.GROQ_API_KEY)
 
-MODEL = "gpt-4o-mini"
+MODEL = "llama-3.3-70b-versatile"
 
 SYSTEM_PROMPT = """You are Really, an AI real estate superconnecter on WhatsApp. Your job is to \
 understand what someone needs in real estate, build their profile through natural conversation, \
