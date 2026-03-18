@@ -94,62 +94,20 @@
   <!-- Form -->
   <section id="form" class="py-24 px-6">
     <div class="max-w-lg mx-auto">
-      <div class="text-center mb-10">
-        <h2 class="text-3xl font-bold mb-3">What brings you here?</h2>
-        <p class="text-gray-500">Select your role and we'll call you in seconds.</p>
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-3">Drop your number.</h2>
+        <p class="text-gray-500">We'll call you right now and handle the rest.</p>
       </div>
 
-      <!-- Role selector -->
-      <div class="grid grid-cols-2 gap-3 mb-8" id="roleGrid">
-        <button type="button" class="role-btn border-2 border-gray-200 rounded-xl p-4 text-left" data-role="buyer">
-          <div class="text-2xl mb-1">🏠</div>
-          <div class="font-semibold text-sm">Buy a property</div>
-          <div class="text-xs text-gray-400 mt-0.5">Looking to purchase</div>
-        </button>
-        <button type="button" class="role-btn border-2 border-gray-200 rounded-xl p-4 text-left" data-role="seller">
-          <div class="text-2xl mb-1">💰</div>
-          <div class="font-semibold text-sm">Sell a property</div>
-          <div class="text-xs text-gray-400 mt-0.5">Have a property to sell</div>
-        </button>
-        <button type="button" class="role-btn border-2 border-gray-200 rounded-xl p-4 text-left" data-role="renter">
-          <div class="text-2xl mb-1">🔑</div>
-          <div class="font-semibold text-sm">Rent a place</div>
-          <div class="text-xs text-gray-400 mt-0.5">Looking for a rental</div>
-        </button>
-        <button type="button" class="role-btn border-2 border-gray-200 rounded-xl p-4 text-left" data-role="landlord">
-          <div class="text-2xl mb-1">🏢</div>
-          <div class="font-semibold text-sm">Rent out my property</div>
-          <div class="text-xs text-gray-400 mt-0.5">Have a unit available</div>
-        </button>
-        <button type="button" class="role-btn border-2 border-gray-200 rounded-xl p-4 text-left" data-role="agent">
-          <div class="text-2xl mb-1">🤝</div>
-          <div class="font-semibold text-sm">I'm an agent</div>
-          <div class="text-xs text-gray-400 mt-0.5">Connect me with clients</div>
-        </button>
-        <button type="button" class="role-btn border-2 border-gray-200 rounded-xl p-4 text-left" data-role="investor">
-          <div class="text-2xl mb-1">📈</div>
-          <div class="font-semibold text-sm">Invest in real estate</div>
-          <div class="text-xs text-gray-400 mt-0.5">Looking for opportunities</div>
-        </button>
-      </div>
-
-      <!-- Contact form -->
       <form id="intakeForm" class="space-y-4">
-        <input type="hidden" id="roleInput" name="role" value="" />
-        <div>
-          <input type="text" id="nameInput" name="name" placeholder="Your full name"
-            class="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm focus:border-brand transition-colors" required />
-        </div>
-        <div>
-          <input type="tel" id="phoneInput" name="phone" placeholder="Phone number (e.g. +1 415 555 0100)"
-            class="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-sm focus:border-brand transition-colors" required />
-        </div>
-        <div id="roleError" class="text-red-500 text-xs hidden">Please select a role above.</div>
+        <input type="tel" id="phoneInput" name="phone" placeholder="+1 415 555 0100"
+          class="w-full border-2 border-gray-200 rounded-xl px-5 py-4 text-base focus:border-brand transition-colors text-center tracking-wide"
+          required autofocus />
         <button type="submit" id="submitBtn"
-          class="w-full bg-brand hover:bg-green-700 text-white font-semibold py-4 rounded-xl transition-colors text-sm shadow-sm">
-          Get connected — we'll call you now
+          class="w-full bg-brand hover:bg-green-700 text-white font-semibold py-4 rounded-xl transition-colors text-base shadow-sm">
+          Call me now →
         </button>
-        <p class="text-xs text-gray-400 text-center">By submitting you agree to receive a call from Really AI. Standard rates apply.</p>
+        <p class="text-xs text-gray-400 text-center">By submitting you agree to receive a call from Really AI.</p>
       </form>
 
       <!-- Calling state -->
@@ -178,36 +136,15 @@
   </footer>
 
   <script>
-    let selectedRole = '';
-
-    // Role selection
-    document.querySelectorAll('.role-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        selectedRole = btn.dataset.role;
-        document.getElementById('roleInput').value = selectedRole;
-        document.getElementById('roleError').classList.add('hidden');
-      });
-    });
-
-    // Form submit
     document.getElementById('intakeForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-
-      if (!selectedRole) {
-        document.getElementById('roleError').classList.remove('hidden');
-        return;
-      }
 
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.textContent = 'Calling...';
 
       const payload = {
-        name: document.getElementById('nameInput').value.trim(),
         phone: document.getElementById('phoneInput').value.trim(),
-        role: selectedRole,
       };
 
       try {

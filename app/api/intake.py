@@ -1,14 +1,13 @@
 """
-Intake endpoint — web form submission → VAPI call
+Intake endpoint — phone number submission → VAPI call
 POST /api/intake/submit
 """
 from fastapi import APIRouter
-from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from sqlmodel import Session, select
 
 from app.db.engine import engine
-from app.db.models import User, UserRole, ConversationState
+from app.db.models import User, ConversationState
 from app.services.vapi import start_intake_call
 from app.core.config import settings
 
@@ -18,9 +17,7 @@ router = APIRouter(prefix="/intake", tags=["intake"])
 
 
 class IntakeSubmission(BaseModel):
-    name: str
     phone: str
-    role: str
 
 
 @router.post("/submit")
@@ -33,25 +30,15 @@ async def submit_intake(body: IntakeSubmission):
         user = s.exec(select(User).where(User.phone == phone)).first()
         if not user:
             user = User(phone=phone)
-        user.name = body.name.strip()
-        try:
-            user.role = UserRole(body.role)
-        except ValueError:
-            pass
         user.state = ConversationState.PROFILE_BUILDING
         s.add(user)
         s.commit()
         s.refresh(user)
 
-    # Trigger VAPI call
     call_id = ""
     if settings.VAPI_API_KEY and settings.VAPI_PHONE_NUMBER_ID:
         try:
-            call_id = await start_intake_call(
-                phone=phone,
-                name=body.name,
-                role=body.role,
-            )
+            call_id = await start_intake_call(phone=phone)
             with Session(engine) as s:
                 user = s.exec(select(User).where(User.phone == phone)).first()
                 if user:

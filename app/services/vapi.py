@@ -49,19 +49,17 @@ CONSENT_STRUCTURED_SCHEMA = {
 }
 
 
-async def start_intake_call(phone: str, name: str, role: str) -> str:
+async def start_intake_call(phone: str) -> str:
     """Initiate a VAPI intake call. Returns the VAPI call ID."""
-    role_context = _role_context(role)
-
     payload = {
         "assistant": {
             "model": {
                 "provider": "groq",
                 "model": "llama-3.3-70b-versatile",
-                "systemPrompt": INTAKE_SYSTEM_PROMPT + f"\n\nThis person signed up as a {role}. {role_context}",
+                "systemPrompt": INTAKE_SYSTEM_PROMPT,
             },
             "voice": {"provider": "playht", "voiceId": "jennifer"},
-            "firstMessage": f"Hey {name}! This is Really — thanks for signing up. I just need a couple minutes to learn what you're looking for so I can find you the perfect match. Sound good?",
+            "firstMessage": "Hey! This is Really — your AI real estate superconnecter. I just need two minutes to learn what you're looking for so I can find you the perfect match. What's your name?",
             "endCallMessage": "Perfect — I have everything I need. I'll call you when I find a match. Talk soon!",
             "metadata": {"call_type": "intake"},
             "analysisPlan": {
@@ -72,7 +70,7 @@ async def start_intake_call(phone: str, name: str, role: str) -> str:
             "serverUrl": f"{settings.PUBLIC_BASE_URL}/api/vapi/webhook",
         },
         "phoneNumberId": settings.VAPI_PHONE_NUMBER_ID,
-        "customer": {"number": phone, "name": name},
+        "customer": {"number": phone},
     }
 
     return await _make_call(payload)
