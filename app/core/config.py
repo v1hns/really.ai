@@ -18,6 +18,14 @@ class Settings(BaseSettings):
 
     # Groq — AI conversations (free tier, llama-3.3-70b)
     GROQ_API_KEY: str
+
+    # VAPI — AI phone calls for intake
+    VAPI_API_KEY: str = ""
+    VAPI_PHONE_NUMBER_ID: str = ""  # VAPI phone number ID (not the E.164 number)
+
+    # Resend — email introductions
+    RESEND_API_KEY: str = ""
+    EMAIL_FROM_DOMAIN: str = "really.ai"  # domain verified in Resend
     VOICE_REPLIES: bool = False   # set True to reply with audio notes instead of text
 
     # Twilio (phone calls)

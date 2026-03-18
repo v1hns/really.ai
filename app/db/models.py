@@ -28,9 +28,11 @@ class ConversationState(str, Enum):
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     phone: str = Field(unique=True, index=True)
+    email: Optional[str] = None
     name: Optional[str] = None
     role: UserRole = UserRole.UNKNOWN
     state: ConversationState = ConversationState.GREETING
+    vapi_call_id: Optional[str] = None   # VAPI call ID for the intake call
 
     # Profile fields (populated conversationally)
     location: Optional[str] = None
@@ -90,3 +92,14 @@ class Match(SQLModel, table=True):
         back_populates="received_matches",
         sa_relationship_kwargs={"foreign_keys": "[Match.target_id]"},
     )
+
+
+class ConsentRequest(SQLModel, table=True):
+    """Tracks SMS consent from matched users before sending email intro."""
+    id: Optional[int] = Field(default=None, primary_key=True)
+    match_id: int = Field(foreign_key="match.id", index=True)
+    # Which user this consent request was sent to
+    user_id: int = Field(foreign_key="user.id")
+    consented: Optional[bool] = None   # None=pending, True=yes, False=no
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    responded_at: Optional[datetime] = None
