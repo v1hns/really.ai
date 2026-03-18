@@ -54,8 +54,8 @@ async def start_intake_call(phone: str) -> str:
     payload = {
         "assistant": {
             "model": {
-                "provider": "groq",
-                "model": "llama-3.3-70b-versatile",
+                "provider": "openai",
+                "model": "gpt-4o",
                 "systemPrompt": INTAKE_SYSTEM_PROMPT,
             },
             "voice": {"provider": "playht", "voiceId": "jennifer"},
@@ -97,8 +97,8 @@ async def start_consent_call(
     payload = {
         "assistant": {
             "model": {
-                "provider": "groq",
-                "model": "llama-3.3-70b-versatile",
+                "provider": "openai",
+                "model": "gpt-4o",
                 "systemPrompt": system,
             },
             "voice": {"provider": "playht", "voiceId": "jennifer"},
@@ -126,8 +126,8 @@ async def start_intro_call(phone: str, name: str, other_name: str, other_phone: 
     payload = {
         "assistant": {
             "model": {
-                "provider": "groq",
-                "model": "llama-3.3-70b-versatile",
+                "provider": "openai",
+                "model": "gpt-4o",
                 "systemPrompt": "You are Really. You're delivering a successful match introduction. Be warm and quick.",
             },
             "voice": {"provider": "playht", "voiceId": "jennifer"},

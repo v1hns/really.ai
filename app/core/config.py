@@ -12,11 +12,8 @@ class Settings(BaseSettings):
     # Anthropic (optional — no longer used for AI, kept for future use)
     ANTHROPIC_API_KEY: str = ""
 
-    # OpenAI — Whisper transcription + TTS voice replies (optional)
-    OPENAI_API_KEY: str = ""
-
-    # Groq — AI conversations (free tier, llama-3.3-70b)
-    GROQ_API_KEY: str
+    # OpenAI — AI conversations + Whisper transcription + TTS voice replies
+    OPENAI_API_KEY: str
 
     # VAPI — AI phone calls for intake
     VAPI_API_KEY: str = ""

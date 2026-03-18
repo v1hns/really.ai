@@ -34,10 +34,9 @@ pip install -r requirements.txt
 
 | Service | URL | What it does | Cost |
 |---|---|---|---|
-| **Groq** | console.groq.com | AI brain (intake conversations) | Free |
+| **OpenAI** | platform.openai.com | AI brain + voice notes (Whisper/TTS) | Pay-as-you-go |
 | **VAPI** | dashboard.vapi.ai | AI phone calls | Free trial |
 | **WhatsApp Cloud API** | developers.facebook.com | WhatsApp channel (optional) | Free |
-| **OpenAI** | platform.openai.com | Voice notes via Whisper/TTS (optional) | Pay-as-you-go |
 
 ### 3. Configure environment
 
@@ -49,7 +48,7 @@ Open `.env` and fill in:
 
 ```env
 # Required
-GROQ_API_KEY=gsk_...               # from console.groq.com → API Keys
+OPENAI_API_KEY=sk-...              # from platform.openai.com → API Keys
 VAPI_API_KEY=...                   # from dashboard.vapi.ai → API Keys
 VAPI_PHONE_NUMBER_ID=...           # from dashboard.vapi.ai → Phone Numbers → copy the ID
 PUBLIC_BASE_URL=https://xxxx.ngrok.io   # your public URL (see step 5)
@@ -59,8 +58,7 @@ WHATSAPP_PHONE_NUMBER_ID=...
 WHATSAPP_ACCESS_TOKEN=...
 WHATSAPP_VERIFY_TOKEN=any_secret_string
 
-# Voice notes (optional)
-OPENAI_API_KEY=sk-...
+# Voice notes (optional — uses same OPENAI_API_KEY)
 VOICE_REPLIES=false
 ```
 
@@ -86,7 +84,7 @@ Copy the `https://xxxx.ngrok.io` URL and set it as `PUBLIC_BASE_URL` in your `.e
 ### 6. Test it
 
 ```bash
-# Terminal demo — no keys needed except GROQ_API_KEY
+# Terminal demo — no keys needed except OPENAI_API_KEY
 python demo.py          # single user
 python demo.py --match  # buyer + seller match demo
 ```
@@ -116,7 +114,7 @@ really.ai/
 │   │   └── engine.py            # SQLite engine (swap to Postgres via DATABASE_URL)
 │   └── services/
 │       ├── vapi.py              # VAPI outbound call client
-│       ├── ai.py                # Groq conversation manager
+│       ├── ai.py                # OpenAI conversation manager
 │       ├── matching.py          # Compatibility scoring engine
 │       ├── whatsapp.py          # WhatsApp Cloud API client
 │       ├── voice.py             # Whisper transcription + TTS
