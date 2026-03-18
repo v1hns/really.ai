@@ -121,7 +121,7 @@ async def handle_call_turn(
 
     with Session(engine) as session:
         user = _get_or_create_user(phone, session)
-        user.last_active = datetime.utcnow()
+        user.last_active = datetime.now(datetime.UTC)
         session.add(session.merge(user))
         session.commit()
         session.refresh(user)

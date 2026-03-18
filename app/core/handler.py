@@ -56,7 +56,7 @@ def _apply_profile_update(user: User, update: dict, session: Session):
             changed = True
 
     if changed:
-        user.updated_at = datetime.utcnow()
+        user.updated_at = datetime.now(datetime.UTC)
         # Advance state if profile is building
         if user.state == ConversationState.GREETING:
             user.state = ConversationState.ROLE_SELECTION
@@ -137,7 +137,7 @@ async def handle_message(phone: str, text: str, button_id: str | None = None):
     """Process one incoming WhatsApp message and send a reply."""
     with Session(engine) as session:
         user = _get_or_create_user(phone, session)
-        user.last_active = datetime.utcnow()
+        user.last_active = datetime.now(datetime.UTC)
         session.add(user)
         session.commit()
         session.refresh(user)

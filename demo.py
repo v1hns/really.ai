@@ -58,7 +58,7 @@ def _get_or_create(phone: str) -> User:
     with Session(engine) as s:
         user = s.exec(select(User).where(User.phone == phone)).first()
         if not user:
-            user = User(phone=phone, last_active=datetime.utcnow())
+            user = User(phone=phone, last_active=datetime.now(datetime.UTC))
             s.add(user)
             s.commit()
             s.refresh(user)
